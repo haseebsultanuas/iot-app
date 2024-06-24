@@ -30,5 +30,6 @@ jobs:
     - name: Build and push Docker image
       run: |
         IMAGE_NAME=gcr.io/iotapp-427320/iot-app-registry
-        docker build -t $IMAGE_NAME Src/node .
+        docker pull nginx
+        docker tag nginx $IMAGE_NAME 
         docker push $IMAGE_NAME

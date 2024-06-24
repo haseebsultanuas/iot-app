@@ -1,0 +1,47 @@
+name: build
+
+inputs:
+  FOLDER_PATH: 
+    required: true
+  AZURE_CONTAINER_REGISTRY:
+    required: true
+  ENV_CONFIG_CONNECTION_STRING:
+    required: true
+  ACR_USERNAME:
+    required: true
+  ACR_PASSWORD:
+    required: true
+  CONTAINER_NAME:
+    required: true
+  CHART_PATH:
+    required: true
+  HELM_VERSION:
+    required: true
+  BRANCH_NAME:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+      # Checks out the repository this file is in
+    - uses: actions/checkout@v3
+
+      #Builds and pushes an image up to your Azure Container Registry
+    - name: Build and push image to ACR
+      shell: bash
+      run: |
+        docker build \
+        ${{ inputs.FOLDER_PATH }} \
+        --file ${{ inputs.FOLDER_PATH }}/Dockerfile \
+        --tag ${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ inputs.CONTAINER_NAME }}:${{ inputs.BRANCH_NAME }}-${{ github.sha }} \
+        --build-arg DOCKER_ENV="${{ inputs.ENV_CONFIG_CONNECTION_STRING }}"
+        docker login ${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io -u ${{ inputs.ACR_USERNAME }} -p ${{ inputs.ACR_PASSWORD }}
+        docker push ${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ inputs.CONTAINER_NAME }}:${{ inputs.BRANCH_NAME }}-${{ github.sha }}
+      
+    - name: Pack and push helm to ACR
+      shell: bash
+      run: |
+        helm package ${{ inputs.CHART_PATH }}
+        helm registry login ${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io --username ${{ inputs.ACR_USERNAME }} --password ${{ inputs.ACR_PASSWORD }}
+        helm push tmse-${{ inputs.HELM_VERSION }}.tgz oci://${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io/backend-helm
+        helm registry logout ${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io

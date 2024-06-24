@@ -1,0 +1,46 @@
+name: build_validation
+
+inputs:
+  SONAR_TOKEN:
+    required: true
+  SONAR_HOST_URL:
+    required: true
+  PROJECT_KEY:
+    required: true
+  PROJECT_FOLDER:
+    required: true
+  PR_SOURCE_BRANCH:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+      # Checks out the repository this file is in
+    - uses: actions/checkout@v3
+    
+    - name: Validate source branch
+      shell: bash
+      run: |
+        if [[ "${{ github.head_ref }}" != ${{ inputs.PR_SOURCE_BRANCH }} ]]; then
+          echo "Error: Only the 'dev' branch can merge into 'qa'."
+          exit 1
+        fi
+
+    - uses: sonarsource/sonarqube-scan-action@master
+      with:
+        projectBaseDir: ${{ inputs.PROJECT_FOLDER }}
+        args: >
+          -Dsonar.projectKey=${{ inputs.PROJECT_KEY }}
+      env:
+        SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
+    
+    - name: Check SonarQube analysis status
+      shell: bash
+      run: |
+        sonar_response=$(curl -X GET -H "Authorization: Bearer ${{ inputs.SONAR_TOKEN }}" ${{ inputs.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ inputs.PROJECT_KEY }})
+        sonar_status=$(echo "$sonar_response" | jq -r '.projectStatus.status')
+        echo "SonarQube status: $sonar_status"
+        if [ "$sonar_status" != "OK" ]; then
+          echo "SonarQube analysis failed. Exiting..."
+        fi

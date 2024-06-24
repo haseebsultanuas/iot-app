@@ -1,0 +1,116 @@
+#TMSE  Backend
+name: tmse-aircraft
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - staging
+      - release
+    paths:
+      - Src/uas-aircraft/**
+      - .github/workflows/tmse-aircraft.yml
+  pull_request:
+    branches:
+      - release
+    types: [opened, synchronize]
+    paths:
+      - Src/uas-aircraft/**
+      - .github/workflows/tmse-aircraft.yml
+
+env:
+  AZURE_CONTAINER_REGISTRY: "acrtmsesharewesteu01"
+  CONTAINER_NAME: "tmse-aircraft"
+  CHART_PATH: "Deploy/helm-template/tmse"
+  FOLDER_PATH: "Src/uas-aircraft"
+  MS_NAME: "tmse-aircraft"
+  HELM_VERSION: "0.1.1"
+  VALUE_FILE_PATH: "Deploy/helm-values/tmse-aircraft.yaml"
+  CONFIG_FILE: "kube.config"
+  GRPC: false
+  GRPC_PORT: 0000
+  SERVICE_PORT: 5008
+  REPLICACOUNT: 1
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
+
+jobs:
+  scancode:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.base.ref == 'release' && github.event.pull_request.head.ref == 'dev'
+    environment: "DEV"
+    steps:
+      # Checks out the repository this file is in
+      - uses: actions/checkout@v3
+
+      - name: build
+        uses: "./.github/template/build_validation"
+        with:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          PROJECT_KEY: ${{ env.MS_NAME }}
+          PROJECT_FOLDER: ${{ env.FOLDER_PATH }}
+          PR_SOURCE_BRANCH: ${{ vars.PR_SOURCE_BRANCH }}
+
+  buildImage:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/release' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/master'
+    environment: ${{ github.ref == 'refs/heads/release' && 'QA' || github.ref == 'refs/heads/staging' && 'UAT' || github.ref == 'refs/heads/master' && 'PROD'  }}
+    steps:
+      # Checks out the repository this file is in
+      - uses: actions/checkout@v3
+
+      - name: build
+        uses: "./.github/template/build"
+        with:
+          FOLDER_PATH: ${{ env.FOLDER_PATH }} 
+          AZURE_CONTAINER_REGISTRY: ${{ env.AZURE_CONTAINER_REGISTRY }}
+          CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
+          CHART_PATH: ${{ env.CHART_PATH }}
+          HELM_VERSION: ${{ env.HELM_VERSION }}
+          ENV_CONFIG_CONNECTION_STRING: ${{ secrets.ENV_CONFIG_CONNECTION_STRING }}
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+          BRANCH_NAME: ${{ env.BRANCH_NAME }}
+
+  deploy_helm:
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/release' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/master'
+    environment: ${{ github.ref == 'refs/heads/release' && 'QA' || github.ref == 'refs/heads/staging' && 'UAT' || github.ref == 'refs/heads/master' && 'PROD'  }}
+    needs: [buildImage]
+    steps:
+      # Checks out the repository this file is in
+      - uses: actions/checkout@v3
+      - name: deploy
+        uses: "./.github/template/deploy"
+        with:
+          AZURE_CONTAINER_REGISTRY: ${{ env.AZURE_CONTAINER_REGISTRY }} 
+          HELM_VERSION: ${{ env.HELM_VERSION }}
+          MS_NAME: ${{ env.MS_NAME }}
+          VALUE_FILE_PATH: ${{ env.VALUE_FILE_PATH }}
+          CONFIG_FILE: ${{ env.CONFIG_FILE }}
+          GRPC: ${{ env.GRPC }}
+          GRPC_PORT: ${{ env.GRPC_PORT }}
+          SERVICE_PORT: ${{ env.SERVICE_PORT }}
+          AUTOSCALING: ${{ vars.AUTOSCALING }}
+          REPLICACOUNT: ${{ env.REPLICACOUNT }}
+          NAMESPACE: ${{ vars.NAMESPACE }}
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+          K8s_CONFIG_FILE: ${{ secrets.ACR_CONFIG_FILE }}
+          BRANCH_NAME: ${{ env.BRANCH_NAME }}
+
+
+      
+
+

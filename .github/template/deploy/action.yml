@@ -56,4 +56,4 @@ runs:
   - name: Clean Up
     shell: bash
     run: |
-      rm -f ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+      rm -f ${{ inputs.GCP_SERVICE_ACCOUNT_KEY }}

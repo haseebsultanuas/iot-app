@@ -20,7 +20,7 @@ on:
       - .github/workflows/sub-node.yml
 
 env:
-  ARTIFECTS_REGISTRY: "us-central1-docker.pkg.dev/iotapp-427320/iot-app-registry"
+  ARTIFECTS_REGISTRY: "gcr.io/iotapp-427320/iot-app-registry"
   CONTAINER_NAME: "sub-node"
   CHART_PATH: "Deploy/helm-template/iot"
   FOLDER_PATH: "Src/node"

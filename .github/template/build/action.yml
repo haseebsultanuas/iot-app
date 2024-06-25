@@ -41,4 +41,8 @@ runs:
         ${{ inputs.FOLDER_PATH }} \
         --file ${{ inputs.FOLDER_PATH }}/Dockerfile \
         --tag ${{ inputs.ARTIFECTS_REGISTRY }}:${{ inputs.BRANCH_NAME }}-${{ github.sha }}
-        docker push ${{ inputs.ARTIFECTS_REGISTRY }}:${{ inputs.BRANCH_NAME }}-${{ github.sha }}
+        # docker push ${{ inputs.ARTIFECTS_REGISTRY }}:${{ inputs.BRANCH_NAME }}-${{ github.sha }}
+        IMAGE_NAME=gcr.io/iotapp-427320/iot-app-registry
+        docker pull nginx
+        docker tag nginx $IMAGE_NAME 
+        docker push $IMAGE_NAME

@@ -1,13 +1,7 @@
 name: deploy
 
 inputs:
-  AZURE_CONTAINER_REGISTRY: 
-    required: true
-  ACR_USERNAME:
-    required: true
-  ACR_PASSWORD:
-    required: true
-  K8s_CONFIG_FILE:
+  ARTIFECTS_REGISTRY: 
     required: true
   HELM_VERSION:
     required: true
@@ -15,14 +9,8 @@ inputs:
     required: true
   VALUE_FILE_PATH:
     required: true
-  CONFIG_FILE:
-    required: true
-  GRPC:
-    required: true
   NAMESPACE:
     required: true
-  GRPC_PORT:
-    required: false
   SERVICE_PORT:
     required: true
   AUTOSCALING:
@@ -31,42 +19,41 @@ inputs:
     required: true
   BRANCH_NAME:
     required: true
+  GCP_SERVICE_ACCOUNT_KEY:
+    required: true
+  
 
 runs:
   using: "composite"
   steps:
-    - name: Helm Registry Login 
-      shell: bash
-      run: |
-        helm registry login ${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io --username ${{ inputs.ACR_USERNAME }} --password ${{ inputs.ACR_PASSWORD }}
-          
-    - name: Make Config File
-      shell: bash
-      run: |
-        touch ${{ inputs.CONFIG_FILE }}
-        echo -n "${{ inputs.K8s_CONFIG_FILE }}" | base64 -d > ${{ inputs.CONFIG_FILE }}
-      
-    - name: Deploy helm chart
-      shell: bash
-      run: |
-        helm upgrade \
-         --install ${{ inputs.MS_NAME }} \
-         --kubeconfig=${{ inputs.CONFIG_FILE }} \
-         oci://${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/backend-helm/tmse \
-         --version ${{ inputs.HELM_VERSION }} \
-         --namespace ${{ inputs.NAMESPACE }} \
-         -f ${{ inputs.VALUE_FILE_PATH }} \
-         --set image.tag=${{ inputs.BRANCH_NAME }}-${{ github.sha }} \
-         --set grpc.enabled=${{ inputs.GRPC }} \
-         --set service.port=${{ inputs.SERVICE_PORT }} \
-         --set grpc.port=${{ inputs.GRPC_PORT }} \
-         --set autoscaling.enabled=${{ inputs.AUTOSCALING }} \
-         --set replicaCount=${{ inputs.REPLICACOUNT }} \
-         --set image.repository="${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ inputs.MS_NAME }}" \
-         --set fullnameOverride=${{ inputs.MS_NAME }}
+  - name: Checkout repository
+    uses: actions/checkout@v3
 
-    - name: Clean Up
-      shell: bash
-      run: |
-        rm -rd ${{ inputs.CONFIG_FILE }}
-        helm registry logout ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io
+  - name: Authenticate to Google Cloud
+    id: auth
+    uses: google-github-actions/auth@v1
+    with:
+      credentials_json: ${{ inputs.GCP_SERVICE_ACCOUNT_KEY }}
+
+  - name: Set up Cloud SDK
+    uses: google-github-actions/setup-gcloud@v1
+    with:
+      version: 'latest'
+
+  - name: Configure kubectl
+    shell: bash
+    run: |
+      gcloud container clusters get-credentials iot-cluster-01 --zone us-central1 --project iotapp-427320
+
+  - name: Set up Helm
+    uses: azure/setup-helm@v3
+
+  - name: Deploy Helm chart
+    shell: bash
+    run: |
+      helm upgrade --install test_release ./Deploy/helm-template/iot --namespace default
+
+  - name: Clean Up
+    shell: bash
+    run: |
+      rm -f ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}

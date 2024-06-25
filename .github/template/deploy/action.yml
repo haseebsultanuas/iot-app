@@ -56,9 +56,4 @@ runs:
   - name: Deploy Helm chart
     shell: bash
     run: |
-      kubectl get pods
-
-  - name: Clean Up
-    shell: bash
-    run: |
-      rm -f ${{ inputs.GCP_SERVICE_ACCOUNT_KEY }}
+      helm upgrade --install YOUR_RELEASE_NAME ./Deploy/helm-template/iot --namespace default

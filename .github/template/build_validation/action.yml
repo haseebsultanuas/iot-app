@@ -16,13 +16,20 @@ runs:
       # Checks out the repository this file is in
     - uses: actions/checkout@v3
 
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@master
-      with:
-        projectBaseDir: ${{ inputs.PROJECT_FOLDER }}
-        args: >
-          -Dsonar.organization=${{ inputs.PROJECT_ORGANIZATION }}
-          -Dsonar.projectKey=${{ inputs.PROJECT_KEY }}
-      env:
-        # GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}  # Needed to get PR information, if any
-        SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
+    # - name: SonarCloud Scan
+    #   uses: SonarSource/sonarcloud-github-action@master
+    #   with:
+    #     projectBaseDir: ${{ inputs.PROJECT_FOLDER }}
+    #     args: >
+    #       -Dsonar.organization=${{ inputs.PROJECT_ORGANIZATION }}
+    #       -Dsonar.projectKey=${{ inputs.PROJECT_KEY }}
+    #   env:
+    #     # GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}  # Needed to get PR information, if any
+    #     SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
+    - name: Install packages
+      shell: bash
+      run: npm install mocha chai supertest --save-dev
+    
+    - name: Run Unit Test
+      shell: bash
+      run: npm test

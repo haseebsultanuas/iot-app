@@ -5,7 +5,8 @@
   "author": "Salih Tuncer",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "mocha"
   },
   "dependencies": {
     "express": "^4.17.1"

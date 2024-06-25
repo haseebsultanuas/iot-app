@@ -5,6 +5,10 @@ inputs:
     required: true
   PROJECT_FOLDER:
     required: true
+  PROJECT_KEY:
+    required: true
+  PROJECT_ORGANIZATION:
+    required: true
 
 runs:
   using: "composite"
@@ -16,6 +20,9 @@ runs:
       uses: SonarSource/sonarcloud-github-action@master
       with:
         projectBaseDir: ${{ inputs.PROJECT_FOLDER }}
+        args: >
+          -Dsonar.organization=${{ inputs.PROJECT_KEY }}
+          -Dsonar.projectKey=${{ inputs.PROJECT_ORGANIZATION }}
       env:
         # GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}

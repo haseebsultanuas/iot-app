@@ -24,6 +24,8 @@ env:
   CONTAINER_NAME: "sub-node"
   CHART_PATH: "Deploy/helm-template/iot"
   FOLDER_PATH: "Src/node"
+  FOLDER_KEY: "iot-app_iot-app"
+  PROJECT_ORGANIZATION: "iot-app"
   MS_NAME: "sub-node"
   HELM_VERSION: "0.1.1"
   VALUE_FILE_PATH: "Deploy/helm-values/sub-node.yaml"
@@ -50,6 +52,9 @@ jobs:
         with:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           PROJECT_FOLDER: ${{ env.FOLDER_PATH }}
+          FOLDER_KEY: ${{ env.FOLDER_PATH }}
+          PROJECT_ORGANIZATION: ${{ env.PROJECT_ORGANIZATION }}
+          
 
   # buildImage:
   #   permissions:

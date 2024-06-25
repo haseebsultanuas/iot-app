@@ -35,11 +35,3 @@ runs:
         --build-arg DOCKER_ENV="${{ inputs.ENV_CONFIG_CONNECTION_STRING }}"
         docker login ${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io -u ${{ inputs.ACR_USERNAME }} -p ${{ inputs.ACR_PASSWORD }}
         docker push ${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ inputs.CONTAINER_NAME }}:${{ inputs.BRANCH_NAME }}-${{ github.sha }}
-      
-    - name: Pack and push helm to ACR
-      shell: bash
-      run: |
-        helm package ${{ inputs.CHART_PATH }}
-        helm registry login ${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io --username ${{ inputs.ACR_USERNAME }} --password ${{ inputs.ACR_PASSWORD }}
-        helm push iot-${{ inputs.HELM_VERSION }}.tgz oci://${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io/backend-helm
-        helm registry logout ${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io

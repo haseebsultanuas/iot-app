@@ -21,8 +21,8 @@ runs:
       with:
         projectBaseDir: ${{ inputs.PROJECT_FOLDER }}
         args: >
-          -Dsonar.organization=${{ inputs.PROJECT_KEY }}
-          -Dsonar.projectKey=${{ inputs.PROJECT_ORGANIZATION }}
+          -Dsonar.organization="${{ inputs.PROJECT_KEY }}"
+          -Dsonar.projectKey="${{ inputs.PROJECT_ORGANIZATION }}"
       env:
         # GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}

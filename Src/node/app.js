@@ -20,4 +20,11 @@ app.get('/', (req, res) => {
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
 
-module.exports = app; 
+function add(numbers) {
+  return numbers
+      .split(',')
+      .map(x => parseInt(x))
+      .reduce((a, b) => a + b)
+}
+
+exports.add = add;

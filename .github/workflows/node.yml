@@ -1,35 +1,112 @@
-name: Build and Push Docker Image to GCR
+name: sub-node 
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - main  # Trigger on pushes to the main branch, adjust as needed
+      - main
+      - uat
+      - qa
+      - dev
+    paths:
+      - Src/node/**
+      - .github/workflows/sub-node.yml
+  pull_request:
+    branches:
+      - dev
+    types: [opened, synchronize]
+    paths:
+      - Src/sub-node/**
+      - .github/workflows/sub-node.yml
+
+env:
+  AZURE_CONTAINER_REGISTRY: "acrtmsesharewesteu01"
+  CONTAINER_NAME: "sub-node"
+  CHART_PATH: "Deploy/helm-template/iot"
+  FOLDER_PATH: "Src/node"
+  MS_NAME: "sub-node"
+  HELM_VERSION: "0.1.1"
+  VALUE_FILE_PATH: "Deploy/helm-values/sub-node.yaml"
+  CONFIG_FILE: "kube.config"
+  SERVICE_PORT: 80
+  AUTOSCALING: false
+  REPLICACOUNT: 1
+  PR_SOURCE_BRANCH: "test_branch"
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
-  build:
+  scancode:
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
-
+    if: github.event.pull_request.base.ref == 'dev'
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # Checks out the repository this file is in
+      - uses: actions/checkout@v3
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: build
+        uses: "./.github/template/build_validation"
+        with:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          PROJECT_FOLDER: ${{ env.FOLDER_PATH }}
 
-    - name: Authenticate to Google Cloud
-      id: auth
-      uses: google-github-actions/auth@v1
-      with:
-        credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+  # buildImage:
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/release' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/master'
+  #   environment: ${{ github.ref == 'refs/heads/release' && 'QA' || github.ref == 'refs/heads/staging' && 'UAT' || github.ref == 'refs/heads/master' && 'PROD'  }}
+  #   steps:
+  #     # Checks out the repository this file is in
+  #     - uses: actions/checkout@v3
 
-    - name: Configure Docker to use the gcloud command-line tool as a credential helper
-      run: |
-        gcloud --quiet auth configure-docker
+  #     - name: build
+  #       uses: "./.github/template/build"
+  #       with:
+  #         FOLDER_PATH: ${{ env.FOLDER_PATH }} 
+  #         AZURE_CONTAINER_REGISTRY: ${{ env.AZURE_CONTAINER_REGISTRY }}
+  #         CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
+  #         CHART_PATH: ${{ env.CHART_PATH }}
+  #         HELM_VERSION: ${{ env.HELM_VERSION }}
+  #         ENV_CONFIG_CONNECTION_STRING: ${{ secrets.ENV_CONFIG_CONNECTION_STRING }}
+  #         ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+  #         ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+  #         BRANCH_NAME: ${{ env.BRANCH_NAME }}
 
-    - name: Build and push Docker image
-      run: |
-        IMAGE_NAME=gcr.io/iotapp-427320/iot-app-registry
-        docker pull nginx
-        docker tag nginx $IMAGE_NAME 
-        docker push $IMAGE_NAME
+  # deploy_helm:
+  #   permissions:
+  #     actions: read
+  #     contents: read
+  #     id-token: write
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/release' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/master'
+  #   environment: ${{ github.ref == 'refs/heads/release' && 'QA' || github.ref == 'refs/heads/staging' && 'UAT' || github.ref == 'refs/heads/master' && 'PROD'  }}
+  #   needs: [buildImage]
+  #   steps:
+  #     # Checks out the repository this file is in
+  #     - uses: actions/checkout@v3
+  #     - name: deploy
+  #       uses: "./.github/template/deploy"
+  #       with:
+  #         AZURE_CONTAINER_REGISTRY: ${{ env.AZURE_CONTAINER_REGISTRY }} 
+  #         HELM_VERSION: ${{ env.HELM_VERSION }}
+  #         MS_NAME: ${{ env.MS_NAME }}
+  #         VALUE_FILE_PATH: ${{ env.VALUE_FILE_PATH }}
+  #         CONFIG_FILE: ${{ env.CONFIG_FILE }}
+  #         GRPC: ${{ env.GRPC }}
+  #         GRPC_PORT: ${{ env.GRPC_PORT }}
+  #         SERVICE_PORT: ${{ env.SERVICE_PORT }}
+  #         AUTOSCALING: ${{ env.AUTOSCALING }}
+  #         REPLICACOUNT: ${{ env.REPLICACOUNT }}
+  #         NAMESPACE: ${{ vars.NAMESPACE }}
+  #         ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+  #         ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+  #         K8s_CONFIG_FILE: ${{ secrets.ACR_CONFIG_FILE }}
+  #         BRANCH_NAME: ${{ env.BRANCH_NAME }} 
+
+
+      
+
+

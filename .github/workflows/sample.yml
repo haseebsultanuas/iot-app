@@ -1,0 +1,35 @@
+name: Build and Push Docker Image to GCR
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch, adjust as needed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+    - name: Configure Docker to use the gcloud command-line tool as a credential helper
+      run: |
+        gcloud --quiet auth configure-docker
+
+    - name: Build and push Docker image
+      run: |
+        IMAGE_NAME=gcr.io/iotapp-427320/iot-app-registry
+        docker pull nginx
+        docker tag nginx $IMAGE_NAME 
+        docker push $IMAGE_NAME

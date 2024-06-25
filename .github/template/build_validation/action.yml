@@ -30,6 +30,10 @@ runs:
       shell: bash
       run: npm install mocha chai supertest --save-dev
     
+    - name: Install dependencies
+      shell: bash
+      run: npm install
+    
     - name: Run Unit Test
       shell: bash
       run: npm test

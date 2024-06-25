@@ -26,6 +26,9 @@ runs:
     #   env:
     #     # GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}  # Needed to get PR information, if any
     #     SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
+    - name: Install dependencies
+      shell: bash
+      run: ls
     - name: Install packages
       shell: bash
       run: npm install mocha chai supertest --save-dev

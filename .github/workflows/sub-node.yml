@@ -20,7 +20,7 @@ on:
       - .github/workflows/sub-node.yml
 
 env:
-  AZURE_CONTAINER_REGISTRY: "acrtmsesharewesteu01"
+  ARTIFECTS_REGISTRY: "us-central1-docker.pkg.dev/iotapp-427320/iot-app-registry"
   CONTAINER_NAME: "sub-node"
   CHART_PATH: "Deploy/helm-template/iot"
   FOLDER_PATH: "Src/node"
@@ -70,12 +70,11 @@ jobs:
         uses: "./.github/template/build"
         with:
           FOLDER_PATH: ${{ env.FOLDER_PATH }} 
-          AZURE_CONTAINER_REGISTRY: ${{ env.AZURE_CONTAINER_REGISTRY }}
+          ARTIFECTS_REGISTRY: ${{ env.ARTIFECTS_REGISTRY }}
           CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
           CHART_PATH: ${{ env.CHART_PATH }}
           HELM_VERSION: ${{ env.HELM_VERSION }}
-          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
-          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+          GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
           BRANCH_NAME: ${{ env.BRANCH_NAME }}
 
   # deploy_helm:

@@ -33,7 +33,6 @@ env:
   SERVICE_PORT: 80
   AUTOSCALING: false
   REPLICACOUNT: 1
-  PR_SOURCE_BRANCH: "test_branch"
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
@@ -56,29 +55,28 @@ jobs:
           PROJECT_ORGANIZATION: ${{ env.PROJECT_ORGANIZATION }}
           
 
-  # buildImage:
-  #   permissions:
-  #     contents: read
-  #     id-token: write
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/release' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/master'
-  #   environment: ${{ github.ref == 'refs/heads/release' && 'QA' || github.ref == 'refs/heads/staging' && 'UAT' || github.ref == 'refs/heads/master' && 'PROD'  }}
-  #   steps:
-  #     # Checks out the repository this file is in
-  #     - uses: actions/checkout@v3
+  buildImage:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main'
+    environment: ${{ github.ref == 'refs/heads/dev' && 'DEV' || github.ref == 'refs/heads/qa' && 'QA' || github.ref == 'refs/heads/main' && 'PROD'  }}
+    steps:
+      # Checks out the repository this file is in
+      - uses: actions/checkout@v3
 
-  #     - name: build
-  #       uses: "./.github/template/build"
-  #       with:
-  #         FOLDER_PATH: ${{ env.FOLDER_PATH }} 
-  #         AZURE_CONTAINER_REGISTRY: ${{ env.AZURE_CONTAINER_REGISTRY }}
-  #         CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
-  #         CHART_PATH: ${{ env.CHART_PATH }}
-  #         HELM_VERSION: ${{ env.HELM_VERSION }}
-  #         ENV_CONFIG_CONNECTION_STRING: ${{ secrets.ENV_CONFIG_CONNECTION_STRING }}
-  #         ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
-  #         ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
-  #         BRANCH_NAME: ${{ env.BRANCH_NAME }}
+      - name: build
+        uses: "./.github/template/build"
+        with:
+          FOLDER_PATH: ${{ env.FOLDER_PATH }} 
+          AZURE_CONTAINER_REGISTRY: ${{ env.AZURE_CONTAINER_REGISTRY }}
+          CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
+          CHART_PATH: ${{ env.CHART_PATH }}
+          HELM_VERSION: ${{ env.HELM_VERSION }}
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+          BRANCH_NAME: ${{ env.BRANCH_NAME }}
 
   # deploy_helm:
   #   permissions:

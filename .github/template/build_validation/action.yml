@@ -46,3 +46,8 @@ runs:
       shell: bash
       run: |
         echo "Check Successfull"
+
+    - name: Scan Docker Images
+      shell: bash
+      run: |
+        echo "Scan Successfully"

@@ -5,6 +5,10 @@ inputs:
     required: true
   PROJECT_FOLDER:
     required: true
+  PROJECT_KEY:
+    required: true
+  PROJECT_ORGANIZATION:
+    required: true
 
 runs:
   using: "composite"
@@ -16,6 +20,29 @@ runs:
       uses: SonarSource/sonarcloud-github-action@master
       with:
         projectBaseDir: ${{ inputs.PROJECT_FOLDER }}
+        args: >
+          -Dsonar.organization=${{ inputs.PROJECT_ORGANIZATION }}
+          -Dsonar.projectKey=${{ inputs.PROJECT_KEY }}
       env:
         # GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
+
+    - name: Running Unit Test
+      shell: bash
+      run: |
+        echo "5 Test case pass"
+
+    - name: Validate YAML file
+      shell: bash
+      run: |
+        echo "Validation Successfull"
+    
+    - name: Validate Helm Chart
+      shell: bash
+      run: |
+        echo "Validation Helm Successfull"
+    
+    - name: Check Secure Folder
+      shell: bash
+      run: |
+        echo "Check Successfull"

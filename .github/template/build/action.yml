@@ -41,5 +41,5 @@ runs:
       run: |
         helm package ${{ inputs.CHART_PATH }}
         helm registry login ${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io --username ${{ inputs.ACR_USERNAME }} --password ${{ inputs.ACR_PASSWORD }}
-        helm push tmse-${{ inputs.HELM_VERSION }}.tgz oci://${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io/backend-helm
+        helm push iot-${{ inputs.HELM_VERSION }}.tgz oci://${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io/backend-helm
         helm registry logout ${{ inputs.AZURE_CONTAINER_REGISTRY }}.azurecr.io

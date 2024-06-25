@@ -51,7 +51,8 @@ runs:
   - name: Deploy Helm chart
     shell: bash
     run: |
-      helm upgrade --install test_release ./Deploy/helm-template/iot --namespace default
+      # helm upgrade --install test_release ./Deploy/helm-template/iot --namespace default
+      kubectl get pods
 
   - name: Clean Up
     shell: bash

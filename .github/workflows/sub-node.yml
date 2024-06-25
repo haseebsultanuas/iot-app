@@ -55,27 +55,27 @@ jobs:
           PROJECT_ORGANIZATION: ${{ env.PROJECT_ORGANIZATION }}
           
 
-  buildImage:
-    permissions:
-      contents: read
-      id-token: write
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main'
-    environment: ${{ github.ref == 'refs/heads/dev' && 'DEV' || github.ref == 'refs/heads/qa' && 'QA' || github.ref == 'refs/heads/main' && 'PROD'  }}
-    steps:
-      # Checks out the repository this file is in
-      - uses: actions/checkout@v3
+  # buildImage:
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main'
+  #   environment: ${{ github.ref == 'refs/heads/dev' && 'DEV' || github.ref == 'refs/heads/qa' && 'QA' || github.ref == 'refs/heads/main' && 'PROD'  }}
+  #   steps:
+  #     # Checks out the repository this file is in
+  #     - uses: actions/checkout@v3
 
-      - name: build
-        uses: "./.github/template/build"
-        with:
-          FOLDER_PATH: ${{ env.FOLDER_PATH }} 
-          ARTIFECTS_REGISTRY: ${{ env.ARTIFECTS_REGISTRY }}
-          CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
-          CHART_PATH: ${{ env.CHART_PATH }}
-          HELM_VERSION: ${{ env.HELM_VERSION }}
-          GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-          BRANCH_NAME: ${{ env.BRANCH_NAME }}
+  #     - name: build
+  #       uses: "./.github/template/build"
+  #       with:
+  #         FOLDER_PATH: ${{ env.FOLDER_PATH }} 
+  #         ARTIFECTS_REGISTRY: ${{ env.ARTIFECTS_REGISTRY }}
+  #         CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
+  #         CHART_PATH: ${{ env.CHART_PATH }}
+  #         HELM_VERSION: ${{ env.HELM_VERSION }}
+  #         GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+  #         BRANCH_NAME: ${{ env.BRANCH_NAME }}
 
   deploy_helm:
     permissions:
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main'
     environment: ${{ github.ref == 'refs/heads/dev' && 'DEV' || github.ref == 'refs/heads/qa' && 'QA' || github.ref == 'refs/heads/main' && 'PROD'  }}
-    needs: [buildImage]
+    # needs: [buildImage]
     steps:
       # Checks out the repository this file is in
       - uses: actions/checkout@v3

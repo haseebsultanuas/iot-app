@@ -28,7 +28,11 @@ runs:
     #     SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
     - name: Install dependencies
       shell: bash
-      run: ls
+      run: |
+        cd Src
+        cd node
+        ls
+
     - name: Install packages
       shell: bash
       run: npm install mocha chai supertest --save-dev

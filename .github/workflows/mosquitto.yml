@@ -1,4 +1,4 @@
-name: pub-python
+name: mosquitto
 
 on:
   workflow_dispatch:
@@ -7,26 +7,26 @@ on:
       - main
       - dev
     paths:
-      - Src/python/**
-      - .github/workflows/pub-python.yml
+      - Src/mosquitto/**
+      - .github/workflows/mosquitto.yml
   pull_request:
     branches:
       - dev
     types: [opened, synchronize]
     paths:
-      - Src/python/**
-      - .github/workflows/pub-python.yml
+      - Src/mosquitto/**
+      - .github/workflows/mosquitto.yml
 
 env:
   ARTIFECTS_REGISTRY: "gcr.io/iotapp-427320/iot-app-registry"
   CONTAINER_NAME: "pub-python"
   CHART_PATH: "Deploy/helm-template/iot"
-  FOLDER_PATH: "Src/python"
+  FOLDER_PATH: "Src/mosquitto"
   PROJECT_KEY: "iot-app_iot-app"
   PROJECT_ORGANIZATION: "iot-app"
-  MS_NAME: "pub-python"
+  MS_NAME: "mosquitto"
   HELM_VERSION: "0.1.1"
-  VALUE_FILE_PATH: "Deploy/helm-values/python.yaml"
+  VALUE_FILE_PATH: "Deploy/helm-values/mosquitto.yaml"
   SERVICE_PORT: 80
   AUTOSCALING: false
   REPLICACOUNT: 1

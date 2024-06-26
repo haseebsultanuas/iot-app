@@ -56,4 +56,4 @@ runs:
   - name: Deploy Helm chart
     shell: bash
     run: |
-      helm upgrade --install test-release ./Deploy/helm-template/iot --namespace default
+      helm upgrade --install ${{ inputs.MS_NAME }} ./Deploy/helm-template/iot --namespace default -f ${{ inputs.VALUE_FILE_PATH }} 

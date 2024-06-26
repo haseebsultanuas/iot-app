@@ -60,7 +60,7 @@ jobs:
     if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main'
     environment: ${{ github.ref == 'refs/heads/dev' && 'DEV' || github.ref == 'refs/heads/qa' && 'QA' || github.ref == 'refs/heads/main' && 'PROD'  }}
     steps:
-      # Checks out the repository this file is in
+      # Checks out the repository this file is in change mode
       - uses: actions/checkout@v3
 
       - name: build

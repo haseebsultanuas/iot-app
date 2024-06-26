@@ -1,34 +1,32 @@
-name: sub-node 
+name: pub-python
 
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-      - uat2
-      - qa
-      - dev
+      - develop
     paths:
-      - Src/node/**
-      - .github/workflows/sub-node.yml
+      - Src/python/**
+      - .github/workflows/pub-python.yml
   pull_request:
     branches:
       - dev
     types: [opened, synchronize]
     paths:
-      - Src/sub-node/**
-      - .github/workflows/sub-node.yml
+      - Src/python/**
+      - .github/workflows/pub-python.yml
 
 env:
   ARTIFECTS_REGISTRY: "gcr.io/iotapp-427320/iot-app-registry"
-  CONTAINER_NAME: "sub-node"
+  CONTAINER_NAME: "pub-python"
   CHART_PATH: "Deploy/helm-template/iot"
-  FOLDER_PATH: "Src/node"
+  FOLDER_PATH: "Src/python"
   PROJECT_KEY: "iot-app_iot-app"
   PROJECT_ORGANIZATION: "iot-app"
-  MS_NAME: "sub-node"
+  MS_NAME: "pub-python"
   HELM_VERSION: "0.1.1"
-  VALUE_FILE_PATH: "Deploy/helm-values/node.yaml"
+  VALUE_FILE_PATH: "Deploy/helm-values/python.yaml"
   SERVICE_PORT: 80
   AUTOSCALING: false
   REPLICACOUNT: 1
@@ -54,27 +52,27 @@ jobs:
           PROJECT_ORGANIZATION: ${{ env.PROJECT_ORGANIZATION }}
           
 
-  # buildImage:
-  #   permissions:
-  #     contents: read
-  #     id-token: write
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main'
-  #   environment: ${{ github.ref == 'refs/heads/dev' && 'DEV' || github.ref == 'refs/heads/qa' && 'QA' || github.ref == 'refs/heads/main' && 'PROD'  }}
-  #   steps:
-  #     # Checks out the repository this file is in
-  #     - uses: actions/checkout@v3
+  buildImage:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/qa' || github.ref == 'refs/heads/main'
+    environment: ${{ github.ref == 'refs/heads/dev' && 'DEV' || github.ref == 'refs/heads/qa' && 'QA' || github.ref == 'refs/heads/main' && 'PROD'  }}
+    steps:
+      # Checks out the repository this file is in
+      - uses: actions/checkout@v3
 
-  #     - name: build
-  #       uses: "./.github/template/build"
-  #       with:
-  #         FOLDER_PATH: ${{ env.FOLDER_PATH }} 
-  #         ARTIFECTS_REGISTRY: ${{ env.ARTIFECTS_REGISTRY }}
-  #         CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
-  #         CHART_PATH: ${{ env.CHART_PATH }}
-  #         HELM_VERSION: ${{ env.HELM_VERSION }}
-  #         GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-  #         BRANCH_NAME: ${{ env.BRANCH_NAME }}
+      - name: build
+        uses: "./.github/template/build"
+        with:
+          FOLDER_PATH: ${{ env.FOLDER_PATH }} 
+          ARTIFECTS_REGISTRY: ${{ env.ARTIFECTS_REGISTRY }}
+          CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
+          CHART_PATH: ${{ env.CHART_PATH }}
+          HELM_VERSION: ${{ env.HELM_VERSION }}
+          GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          BRANCH_NAME: ${{ env.BRANCH_NAME }}
 
   deploy_helm:
     permissions:

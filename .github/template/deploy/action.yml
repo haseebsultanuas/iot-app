@@ -56,4 +56,4 @@ runs:
   - name: Deploy Helm chart
     shell: bash
     run: |
-      helm upgrade --install ${{ inputs.MS_NAME }} ./Deploy/helm-template/iot --namespace default -f ${{ inputs.VALUE_FILE_PATH }} 
+      helm upgrade --install ${{ inputs.MS_NAME }} ./Deploy/helm-template/iot --namespace default -f ${{ inputs.VALUE_FILE_PATH }} --set image.tag=${{ inputs.BRANCH_NAME }}-${{ github.sha }}
